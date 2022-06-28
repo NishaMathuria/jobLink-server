@@ -2,7 +2,7 @@ const employee = require("../model/employee");
 const employee = require("../model/employee");
 
 const employeedetail = async (req, res) => {
-    const employee = await Employee.findById(req.user.id).populate(req.historyType);
+    const employee = await Employee.findById(req.employee.id).populate(req.historyType);
     let data = employee[req.historyType].map((details) => {
         return {
           firstName : details.firstName,
