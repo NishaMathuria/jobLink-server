@@ -1,7 +1,9 @@
 const mongoose = require("mongoose");
 const schema = mongoose.Schema;
 
-const Employee = new schema (
+
+// employee schema & modal
+const EmployeeSchema = new schema (
     {
         firstName: {
             type : String,
@@ -60,4 +62,5 @@ const Employee = new schema (
     }
 ) ;
 
-module.exports = mongoose.model("Employee",Employee);
+const Employee = mongoose.model("Employee",Employee);
+module.exports = Employee;
