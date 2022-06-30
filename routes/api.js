@@ -43,7 +43,7 @@ router.delete('/employee/:id', function(req,res,next) {
 
 // for GET request (get the list of project database)
 router.get('/project',function(req,res,next){
-    Project.find({}).then(function(project){
+    Project.find({}).then(function(projects){
         res.send({projects});
     }).catch(next);
 });
@@ -72,3 +72,5 @@ router.delete('/project/:id', function(req,res,next) {
         res.send({project});
     });
 });
+
+module.exports = router;

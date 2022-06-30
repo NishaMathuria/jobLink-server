@@ -25,7 +25,6 @@ const EmployeeSchema = new schema (
         certificate: {
             type : String,
             required: true,
-            default: null,
         },
         welder: {
             type : String,
@@ -62,5 +61,5 @@ const EmployeeSchema = new schema (
     }
 ) ;
 
-const Employee = mongoose.model("Employee",Employee);
+const Employee = mongoose.model("Employee",EmployeeSchema);
 module.exports = Employee;
