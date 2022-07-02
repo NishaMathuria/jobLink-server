@@ -8,12 +8,11 @@ const verifyToken = (req,res,next) => {
     }
 
     try {
-        const decode = jwt.verify(token,config.TOKEN_KEY);
-        req.user = decoded;
+        const decode = jwt.verify(token,"joblink");
+        req.user = decode; 
+        // req.user = User.find({_id:decode._id});
     } catch (err) {
         return res.status(401).send("Invalid Token");
     }
     return next();
 }
-
-module.exports = verifyToken;
