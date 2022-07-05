@@ -56,19 +56,61 @@ router.post('/newEmployee',async(req,res,next) => {
 
 
 // for PUT request (update of employee in the database)
-router.put('/employee/:id', function(req, res,next){
-    Employee.findOneAndUpdate({_id: req.params.id},req.body).then(function(employee){
-        Employee.findOne({_id:req.params.id}).then(function(employee){
-            res.send({employee});
-        })
-    })
+router.patch('/employee/:id', async(req, res,next) => {
+    try {
+        
+    } catch (error) {
+        
+    }
+    // Employee.findOneAndUpdate({_id: req.params.id},req.body).then(function(employee){
+    //     Employee.findOne({_id:req.params.id}).then(function(employee){
+    //         res.send({employee});
+    //     })
+    // })
+
+    const updates = Object.keys(req.body)
+    const allowedUpdates = ["firstName","lastName","phoneNumber","email","certificate","welder","fitter","rigger","sacffolder","instructionTech","election","mechanic","craneOperator"]
+    const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
+    // const employee_id =  req.employee._id 
+    console.log(req.params);
+    
+    res.send({message:'success'});
+    // if(!isValidOperation){
+    //     res.status(400).send({error:'Invalid request'})
+    // }
+
+    // if (!ObjectID.isValid(employee_id)) {
+    //     return res.status(404).send();
+    // }
+
+    // try {
+    //     updates.forEach((update) => req.employee[update] = req.body[update])
+    //     await req.employee.save()
+    //     res.send(req.user);
+    // } catch(error) {
+    //     res.status(400).send()
+    // }
 })
+
+
 
 // for DELETE request (delete the employee in the database)
 router.delete('/employee/:id', function(req,res,next) {
-    employee.findOneAndDelete({_id: req.params.id}).then(function(employee){
-        res.send({employee});
-    });
+    // employee.findOneAndDelete({_id: req.params.id}).then(function(employee){
+    //     res.send({employee});
+    // });
+
+    if(!ObjectID.isValid(req.employee._id)) {
+        return res.status(400).send();
+    }
+
+    try {
+        await req.employee.remove()
+        res.send(req.employee)
+    } catch (error) {
+        res.status(500).send()
+    }
+
 });
 
 
@@ -85,10 +127,6 @@ router.get('/project',function(req,res,next){
 
 // for POST request (add new project in the database)
 router.post('/newProject',async (req,res,next) => {
-    // Project.create({}).then(function(project){
-    //      res.send({project});
-    // }).catch(next);
-
     try {
 
         // get use input
@@ -119,19 +157,33 @@ router.post('/newProject',async (req,res,next) => {
 
 
 // for PUT request (update of project in the database)
-router.put('/project/:id', function(req, res,next){
-    Project.findOneAndUpdate({_id: req.params.id},req.body).then(function(project){
-        Project.findOne({_id:req.params.id}).then(function(project){
-            res.send({project});
-        })
-    })
+router.patch('/project/:id', function(req, res,next){
+    // Project.findOneAndUpdate({_id: req.params.id},req.body).then(function(project){
+    //     Project.findOne({_id:req.params.id}).then(function(project){
+    //         res.send({project});
+    //     })
+    // })
+
+
 })
 
 // for DELETE request (delete the project in the database)
 router.delete('/project/:id', function(req,res,next) {
-    Project.findOneAndDelete({_id: req.params.id}).then(function(project){
-        res.send({project});
-    });
+    // Project.findOneAndDelete({_id: req.params.id}).then(function(project){
+    //     res.send({project});
+    // });
+
+    // if(!ObjectID.isValid(req.employee._id)) {
+    //     return res.status(400).send();
+    // }
+
+    // try {
+    //     await req.project.remove()
+    //     res.send(req.project)
+    // } catch (error) {
+    //     res.status(500).send()
+    // }
+
 });
 
 module.exports = router;

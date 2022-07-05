@@ -1,8 +1,10 @@
-const { useColors } = require('debug/src/browser');
+// const { useColors } = require('debug/src/browser');
 const express = require('express');
+// app.use('/', express.static(path.join(__dirname,'static')))
 const mongoose = require('mongoose');
 const Employee = require('./model/employee');
 const Project = require('./model/project');
+
 const apiRoutes = require('./routes/api')
 const app = express() // set up for express
 
@@ -19,9 +21,12 @@ app.use(express.json());
 
 const db = mongoose.connection // it show the message in the terminal
 
-app.get('/',(req,res) => {
-    res.send('welcome')
+app.post('/joblink/create-project',async (req,res) => {
+    console.log(req.body)
+    res.json({ status: 'ok'})
 })
+
+
 
 // routes
 app.use('/api',apiRoutes);
@@ -32,11 +37,6 @@ app.use(function(err,req,res,next) {
     console.log(err);
     res.status(422).send({error: err.message})
 });
-
-// ---------------------------------------------------
-    
-
-// ---------------------------------------------------
 
 // listen for request
 app.listen(4000, () => 
