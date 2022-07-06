@@ -1,3 +1,4 @@
+const mongoose = require("mongoose")
 const express = require('express');
 const router = express.Router();
 const Employee = require('../model/employee');
@@ -7,111 +8,140 @@ const jwt = require("jsonwebtoken");
 // --------------- employee -------------------------
 
 // for GET request (get the list of employee database)
-router.get('/employee',function(req,res,next){
-    Employee.find({}).then(function(employees){
-        res.send({employees});
-    }).catch(next);
-});
+router.get("/employee", function (req, res, next) {
+    Employee.find({})
+      .then((employees) => {
+        res.send({ employees });
+      })
+      .catch(next);
+  });
 
 
 // for POST request (add new employee in the database)
-router.post('/newEmployee',async(req,res,next) => {
-    
-
+router.post("/newEmployee", async (req, res, next) => {
     try {
-        const {firstName,lastName,phoneNumber,email,certificate,welder,fitter,rigger,sacffolder,instructionTech,election,mechanic,craneOperator} = req.body;
-
-        if(!(firstName && lastName && phoneNumber &&email && certificate && welder && fitter && rigger && sacffolder && instructionTech && election && mechanic && craneOperator)) {
-            res.status(400).send("All input is required");
-        }
-
-        const employee = await Employee.create({
-            firstName,
-            lastName,
-            phoneNumber,
-            email: email.toLowerCase(),
-            certificate,
-            welder,
-            fitter,
-            rigger,
-            sacffolder,
-            instructionTech,
-            election,
-            mechanic,
-            craneOperator
-        })
-
-
-        const token = jwt.sign(
-            {employee_id : employee._id},
-            "joblink"
-        );
-
-        employee.token = token;
-        res.status(201).send({employee,token});
-    } catch(err) {
-        console.log(err);
+      const {
+        firstName,
+        lastName,
+        phoneNumber,
+        email,
+        certificate,
+        welder,
+        fitter,
+        rigger,
+        sacffolder,
+        instructionTech,
+        election,
+        mechanic,
+        craneOperator,
+      } = req.body;
+  
+      if (
+        !(
+          firstName &&
+          lastName &&
+          phoneNumber &&
+          email &&
+          certificate &&
+          welder &&
+          fitter &&
+          rigger &&
+          sacffolder &&
+          instructionTech &&
+          election &&
+          mechanic &&
+          craneOperator
+        )
+      ) {
+        res.status(400).send("All input is required");
+      }
+  
+      const employee = await Employee.create({
+        firstName,
+        lastName,
+        phoneNumber,
+        email: email.toLowerCase(),
+        certificate,
+        welder,
+        fitter,
+        rigger,
+        sacffolder,
+        instructionTech,
+        election,
+        mechanic,
+        craneOperator,
+      });
+  
+      const token = jwt.sign({ employee_id: employee._id }, "joblink");
+  
+      employee.token = token;
+      res.status(201).send({ employee, token });
+    } catch (err) {
+      console.log(err);
     }
-});
+  });
+  
 
 
 // for PUT request (update of employee in the database)
-router.patch('/employee/:id', async(req, res,next) => {
+router.patch("/employee/:id", async (req, res, next) => {
     try {
-        
+      const employee_id = mongoose.mongo.ObjectId(req.params.id);
+  
+      const updates = Object.keys(req.body);
+      const allowedUpdates = [
+        "firstName",
+        "lastName",
+        "phoneNumber",
+        "email",
+        "certificate",
+        "welder",
+        "fitter",
+        "rigger",
+        "sacffolder",
+        "instructionTech",
+        "election",
+        "mechanic",
+        "craneOperator",
+      ];
+      const isValidOperation = updates.every((update) =>
+        allowedUpdates.includes(update),
+      );
+      if (!isValidOperation) {
+        res.status(400).send({ error: "Invalid request" });
+      }
+  
+      if (!employee_id) {
+        return res.status(404).send();
+      }
+      const employee = await Employee.findOne({ _id: employee_id });
+  
+      updates.forEach((update) => (employee[update] = req.body[update]));
+      await employee.save();
+      res.send(employee);
     } catch (error) {
-        
+      console.log(error);
+      res.status(400).send();
     }
-    // Employee.findOneAndUpdate({_id: req.params.id},req.body).then(function(employee){
-    //     Employee.findOne({_id:req.params.id}).then(function(employee){
-    //         res.send({employee});
-    //     })
-    // })
-
-    const updates = Object.keys(req.body)
-    const allowedUpdates = ["firstName","lastName","phoneNumber","email","certificate","welder","fitter","rigger","sacffolder","instructionTech","election","mechanic","craneOperator"]
-    const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
-    // const employee_id =  req.employee._id 
-    console.log(req.params);
-    
-    res.send({message:'success'});
-    // if(!isValidOperation){
-    //     res.status(400).send({error:'Invalid request'})
-    // }
-
-    // if (!ObjectID.isValid(employee_id)) {
-    //     return res.status(404).send();
-    // }
-
-    // try {
-    //     updates.forEach((update) => req.employee[update] = req.body[update])
-    //     await req.employee.save()
-    //     res.send(req.user);
-    // } catch(error) {
-    //     res.status(400).send()
-    // }
-})
+  });
 
 
 
 // for DELETE request (delete the employee in the database)
-router.delete('/employee/:id', function(req,res,next) {
-    // employee.findOneAndDelete({_id: req.params.id}).then(function(employee){
-    //     res.send({employee});
-    // });
-
-    if(!ObjectID.isValid(req.employee._id)) {
-        return res.status(400).send();
+router.delete("/employee/:id", async (req, res, next) => {
+    const employee = await Employee.findOneAndDelete({ _id: req.params.id });
+  
+    if (employee.length == 0) {
+      return res.status(400).send();
     }
-
+  
     try {
-        await req.employee.remove()
-        res.send(req.employee)
+      await employee.remove();
+      res.send(employee);
     } catch (error) {
-        res.status(500).send()
+      res.status(500).send();
     }
-
-});
+  });
 
 
 
@@ -119,9 +149,11 @@ router.delete('/employee/:id', function(req,res,next) {
 
 // for GET request (get the list of project database)
 router.get('/project',function(req,res,next){
-    Project.find({}).then(function(projects){
-        res.send({projects});
-    }).catch(next);
+    Project.find({})
+        .then((projects) => {
+            res.send({projects});
+        })
+        .catch(next);
 });
 
 
@@ -130,10 +162,29 @@ router.post('/newProject',async (req,res,next) => {
     try {
 
         // get use input
-        const {projectTitle ,projectDescription ,startDate ,endDate ,projectLocation ,selectSupervisor ,expectedMember,addUser} = req.body;
+        const {projectTitle ,
+            projectDescription ,
+            startDate ,
+            endDate ,
+            projectLocation ,
+            selectSupervisor ,
+            expectedMember,
+            addUser
+        } = req.body;
 
         // validation
-        if(!(projectTitle && projectDescription && startDate && endDate && projectLocation &&selectSupervisor && expectedMember && addUser)){
+        if(
+            !(
+                projectTitle && 
+                projectDescription && 
+                startDate && 
+                endDate && 
+                projectLocation &&
+                selectSupervisor && 
+                expectedMember && 
+                addUser
+                )
+                ) {
             res.status(400).send("All input is required");
         }
 
@@ -157,33 +208,56 @@ router.post('/newProject',async (req,res,next) => {
 
 
 // for PUT request (update of project in the database)
-router.patch('/project/:id', function(req, res,next){
-    // Project.findOneAndUpdate({_id: req.params.id},req.body).then(function(project){
-    //     Project.findOne({_id:req.params.id}).then(function(project){
-    //         res.send({project});
-    //     })
-    // })
+router.patch("/project/:id", async (req, res, next) => {
+    try {
+      const project_id = mongoose.mongo.ObjectId(req.params.id);
+  
+      const updates = Object.keys(req.body);
+      const allowedUpdates = [
+        "projectTitle" ,
+            "projectDescription" ,
+            "startDate" ,
+            "projectLocation" ,
+            "selectSupervisor" ,
+            "expectedMember",
+            "addUser"
+      ];
+      const isValidOperation = updates.every((update) =>
+        allowedUpdates.includes(update),
+      );
+      if (!isValidOperation) {
+        res.status(400).send({ error: "Invalid request" });
+      }
+  
+      if (!project_id) {
+        return res.status(404).send();
+      }
+      const project = await Project.findOne({ _id: project_id });
+  
+      updates.forEach((update) => (project[update] = req.body[update]));
+      await project.save();
+      res.send(project);
+    } catch (error) {
+      console.log(error);
+      res.status(400).send();
+    }
+  });
 
-
-})
 
 // for DELETE request (delete the project in the database)
-router.delete('/project/:id', function(req,res,next) {
-    // Project.findOneAndDelete({_id: req.params.id}).then(function(project){
-    //     res.send({project});
-    // });
-
-    // if(!ObjectID.isValid(req.employee._id)) {
-    //     return res.status(400).send();
-    // }
-
-    // try {
-    //     await req.project.remove()
-    //     res.send(req.project)
-    // } catch (error) {
-    //     res.status(500).send()
-    // }
-
-});
+router.delete("/project/:id", async (req, res, next) => {
+    const project = await Project.findOneAndDelete({ _id: req.params.id });
+  
+    if (project.length == 0) {
+      return res.status(400).send();
+    }
+  
+    try {
+      await project.remove();
+      res.send(project);
+    } catch (error) {
+      res.status(500).send();
+    }
+  });
 
 module.exports = router;
